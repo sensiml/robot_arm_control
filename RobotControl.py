@@ -11,20 +11,22 @@ BAUD_RATE = 115200      #baurate matching serial monitor on IDE & BraccioControl
 
 
 def send_command(ser, command):
-    ser.write(str.encode(command))
+    ser.write(str.encode(command+"\n"))
 
 
 if __name__ == "__main__":
 
-    with serial.Serial(PORT, BAUD_RATE, timeout=1) as ser:
+    with serial.Serial(PORT, BAUD_RATE, timeout=2) as ser:
+        time.sleep(15)
 
         r = requests.post(
             "http://127.0.0.1:5555/record", data={"event_type": "record-stop"}      #stops recording for initialization
         )
-        send_command(ser, "start")
-        time.sleep(3)
 
-        steps_to_run = ["stand", "start", "reach", "start" , "stand"]
+        send_command(ser, "stand")
+        time.sleep(5)
+
+        steps_to_run = ["stand_start", "start_reach", "reach_start", "start_stand"]
 
         num_iterations = 2
 
@@ -40,10 +42,10 @@ if __name__ == "__main__":
                     },
                 )
                 print(r.json())
-                time.sleep(2)
+                time.sleep(5)
                 send_command(ser, step)
                 print("command {step} sent".format(step=step))
-                time.sleep(5)
+                time.sleep(10)
                 r = requests.post(
                     "http://127.0.0.1:5555/record",
                     data={
